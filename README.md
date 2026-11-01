@@ -10,6 +10,8 @@ FairShare works out what each person owes after a shared meal. It splits a bill 
 
 The product documents are in [docs/](docs/): [App Roles](docs/app-roles.md), [Jobs To Be Done](docs/jobs-to-be-done.md) and [User Stories with Acceptance Criteria](docs/user-stories.md). All 13 stories are implemented.
 
+**Live app:** https://adeel2208.github.io/adeel-mukhtar-calculator/ is the same code as this repository, served by GitHub Pages. You can also run it on your own computer, as described below.
+
 ## Run it
 
 **Prerequisites:** a current version of Chrome, Edge, Firefox or Safari. Nothing else is needed: no Node.js, no install step, no accounts and no network.
@@ -38,6 +40,8 @@ The app is plain HTML, CSS and JavaScript with no dependencies or build step.
 | `src/app.js` | Screen logic: state, input checks, drawing the result. |
 | `src/index.html`, `src/styles.css` | Page and styles. |
 | `docs/` | Roles, jobs and user stories. |
+| `transcripts/` | The AI session transcript. |
+| `index.html`, `.nojekyll` | Used only by the live GitHub Pages site. `index.html` forwards to `src/`. |
 
 ## Tests
 
@@ -50,7 +54,11 @@ At the product owner's request, each story's tests were removed from the reposit
 - **Tool:** Claude Code (VS Code extension)
 - **Model:** Claude Opus 5.5 (`claude-opus-5-5`)
 
-The session transcripts go in `transcripts/`, exported with Claude Code's `/export` command.
+## Session transcript
+
+[transcripts/session-01.md](transcripts/session-01.md) is the full Claude Code session for this submission, exported with `/export` and unedited. It covers the spec, the build, the verification and the publishing.
+
+Before this session, I made an earlier attempt at the same brief in separate sessions, in a different codebase that is not part of this submission. The only thing reused from it was the headless-browser test helper, which was adapted to run the tests during this session. It is not in this repository.
 
 ## Code changed by hand
 
