@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FairShare · Bill Splitter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>FairShare</h1>
+      <p class="tagline">Split a bill with tax and tip, to the exact cent.</p>
+    </div>
+    <button type="button" id="start-over">Start over</button>
+  </header>
+  <div class="toast" id="toast" role="status" hidden>
+    <span>Bill cleared.</span>
+    <button type="button" id="undo">Undo</button>
+  </div>
+
+  <main class="layout">
+    <form class="bill" id="bill" novalidate autocomplete="off">
+      <div class="tabs" role="tablist" aria-label="How to split the bill">
+        <button type="button" role="tab" id="tab-even" aria-controls="panel-even">Split evenly</button>
+        <button type="button" role="tab" id="tab-item" aria-controls="panel-item">Split by item</button>
+      </div>
+
+      <div class="panel" id="panel-even" role="tabpanel" aria-labelledby="tab-even">
+        <div class="field">
+          <label for="subtotal">Subtotal <span class="hint">before tax and tip</span></label>
+          <div class="input money"><span aria-hidden="true">$</span><input id="subtotal" inputmode="decimal" aria-describedby="subtotal-error"></div>
+          <p class="error" id="subtotal-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="people">Number of people <span class="hint">including you</span></label>
+          <div class="stepper">
+            <button type="button" id="people-down" aria-label="One fewer person">−</button>
+            <input id="people" inputmode="numeric" aria-describedby="people-error">
+            <button type="button" id="people-up" aria-label="One more person">+</button>
+          </div>
+          <p class="error" id="people-error" aria-live="polite"></p>
+        </div>
+
+        <label class="toggle"><input type="checkbox" id="round-up"><span>Round shares up to whole dollars <span class="hint">for paying in cash</span></span></label>
+      </div>
+
+      <div class="panel" id="panel-item" role="tabpanel" aria-labelledby="tab-item" hidden>
+        <fieldset class="field">
+          <legend>People</legend>
+          <ul class="list" id="diners"></ul>
+          <button type="button" class="add" id="add-person">+ Add person</button>
+          <p class="hint limit" id="add-person-limit"></p>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Items <span class="hint">from the receipt</span></legend>
+          <ul class="list" id="items"></ul>
+          <button type="button" class="add" id="add-item">+ Add item</button>
+          <p class="hint limit" id="add-item-limit"></p>
+        </fieldset>
+
+        <div class="field">
+          <label for="receipt">Receipt subtotal <span class="hint">optional, to check your items</span></label>
+          <div class="input money"><span aria-hidden="true">$</span><input id="receipt" inputmode="decimal" aria-describedby="receipt-error receipt-check"></div>
+          <p class="error" id="receipt-error" aria-live="polite"></p>
+          <p class="check" id="receipt-check" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="tax">Tax <span class="hint">amount on the receipt</span></label>
+        <div class="input money"><span aria-hidden="true">$</span><input id="tax" inputmode="decimal" placeholder="0.00" aria-describedby="tax-error"></div>
+        <p class="error" id="tax-error" aria-live="polite"></p>
+      </div>
+
+      <fieldset class="field">
+        <legend>Tip <span class="hint">on the subtotal</span></legend>
+        <div class="tip-row">
+          <button type="button" class="tip-preset" data-tip="0">0%</button>
+          <button type="button" class="tip-preset" data-tip="1000">10%</button>
+          <button type="button" class="tip-preset" data-tip="1500">15%</button>
+          <button type="button" class="tip-preset" data-tip="1800">18%</button>
+          <button type="button" class="tip-preset" data-tip="2000">20%</button>
+          <div class="input custom">
+            <label for="tip-custom" class="sr-only">Custom tip percentage</label>
+            <input id="tip-custom" inputmode="decimal" placeholder="Custom" aria-describedby="tip-custom-error"><span aria-hidden="true">%</span>
+          </div>
+        </div>
+        <p class="error" id="tip-custom-error" aria-live="polite"></p>
+      </fieldset>
+    </form>
+
+    <section class="result" aria-label="Result">
+      <div aria-live="polite">
+        <p id="result-message" class="result-message"></p>
+        <div id="even-result" hidden>
+          <dl class="breakdown">
+            <div><dt>Subtotal</dt><dd id="out-subtotal"></dd></div>
+            <div><dt>Tax</dt><dd id="out-tax"></dd></div>
+            <div><dt id="out-tip-label">Tip</dt><dd id="out-tip"></dd></div>
+            <div class="total"><dt>Total</dt><dd id="out-total"></dd></div>
+          </dl>
+          <p id="shares" class="shares"></p>
+          <p id="shares-note" class="note"></p>
+          <details class="paid">
+            <summary>Track who has paid</summary>
+            <ul class="paid-list" id="paid-list"></ul>
+            <p class="note" id="paid-cleared"></p>
+            <p class="paid-status" id="paid-status"></p>
+          </details>
+          <div class="compare">
+            <h2 id="compare-title">Compare tips</h2>
+            <div class="table-wrap">
+              <table id="tip-table" class="split-table" aria-labelledby="compare-title">
+                <thead>
+                  <tr><th scope="col">Tip</th><th scope="col">Tip amount</th><th scope="col">Total</th><th scope="col">Per person</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="item-result" class="table-wrap" hidden>
+          <table id="person-table" class="split-table">
+            <caption class="sr-only">What each person owes</caption>
+            <thead>
+              <tr><th scope="col">Person</th><th scope="col">Items</th><th scope="col">Tax</th><th scope="col">Tip</th><th scope="col">Total</th></tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="copy">
+        <button type="button" id="copy" disabled>Copy breakdown</button>
+        <p class="error" id="copy-error" aria-live="polite"></p>
+        <textarea id="copy-text" rows="4" readonly hidden aria-label="Breakdown to copy"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <script src="calc.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

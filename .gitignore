@@ -1,0 +1,12 @@
+# The assignment brief is not part of the submission
+Take-Home Assignment_*.md
+
+# Dependencies and build output
+node_modules/
+dist/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
